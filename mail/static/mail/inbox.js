@@ -114,6 +114,8 @@ function load_mailbox(mailbox) {
           emails.forEach(email => {
               const element = document.createElement('div');
               element.className = 'email';
+              // Aplicar color de fondo dependiendo del estado del email
+              element.style.backgroundColor = email.read ? '#d0d0d0' : '#ffffff'; // Gris si está leído, blanco si no
               element.innerHTML = `
                   <div class="email-details">
                       <strong>${email.sender}</strong> - ${email.subject}
@@ -130,6 +132,7 @@ function load_mailbox(mailbox) {
       document.querySelector('#emails-view').innerHTML = `<p>Error loading emails.</p>`;
   });
 }
+
 
 
 function load_email(email_id, mailbox) {
