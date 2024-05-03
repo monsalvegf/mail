@@ -26,3 +26,20 @@ textarea {
     white-space: nowrap;
     opacity: 0.75;
 }
+
+.email-container {
+    position: relative;
+  }
+  
+  .action-buttons {
+    position: absolute;
+    right: 0;
+    top: 0;
+    display: flex;
+    gap: 10px;
+  }
+  
+  .email-content {
+    padding-top: 40px; /* Espacio para no solapar con los botones */
+  }
+  

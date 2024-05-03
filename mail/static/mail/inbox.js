@@ -148,18 +148,31 @@ function load_email(email_id, mailbox) {
   .then(email => {
     console.log(email);
 
+    // Crear contenedor para el correo electrónico
+    const emailContainer = document.createElement('div');
+    emailContainer.className = 'email-container';
+
     // Crear elementos para mostrar el correo electrónico
-    const element = document.createElement('div');
-    element.innerHTML = `
+    const emailContent = document.createElement('div');
+    emailContent.className = 'email-content';
+    emailContent.innerHTML = `
       <p><strong>From:</strong> ${email.sender}</p>
       <p><strong>To:</strong> ${email.recipients.join(', ')}</p>
       <p><strong>Subject:</strong> ${email.subject}</p>
       <p><strong>Sent at:</strong> ${email.timestamp}</p>
-      <button class="btn btn-sm btn-outline-primary" id="reply-button">Reply</button>
       <hr>
       <p>${email.body}</p>
     `;
-    document.querySelector('#email-view').append(element);
+
+    // Botones de acción en la parte superior derecha
+    const actionButtons = document.createElement('div');
+    actionButtons.className = 'action-buttons';
+    const replyButton = document.createElement('button');
+    replyButton.className = 'btn btn-sm btn-outline-primary';
+    replyButton.textContent = 'Reply';
+    replyButton.addEventListener('click', () => reply_email(email));
+
+    actionButtons.appendChild(replyButton);
 
     // Agregar botón de archivar/desarchivar según el buzón
     if (mailbox !== 'sent') {  // No agregar en correos enviados
@@ -170,8 +183,13 @@ function load_email(email_id, mailbox) {
         event.stopPropagation(); // Evitar que el evento se propague más
         archiveEmail(email_id, mailbox !== 'archive'); // Archivar si no está en archivo, desarchivar si está
       });
-      element.appendChild(archiveButton);
+      actionButtons.appendChild(archiveButton);
     }
+
+    emailContainer.appendChild(actionButtons);
+    emailContainer.appendChild(emailContent);
+
+    document.querySelector('#email-view').append(emailContainer);
 
     // Marcar el correo electrónico como leído
     if (mailbox === 'inbox' && !email.read) {
@@ -182,11 +200,9 @@ function load_email(email_id, mailbox) {
         })
       });
     }
-
-    // Agregar un event listener para el botón de respuesta
-    document.querySelector('#reply-button').addEventListener('click', () => reply_email(email));
   });
 }
+
 
 // Función para archivar o desarchivar correo
 function archiveEmail(emailId, archive) {
