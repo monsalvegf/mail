@@ -22,10 +22,48 @@ function compose_email() {
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
 
-  // Add event listener to the send button
+  // Add event listener to the send button (preparar el botón de envío)
   document.querySelector('#send-button').removeEventListener('click', send_email); // Eliminar listener existente para evitar duplicados
   document.querySelector('#send-button').addEventListener('click', send_email);
 }
+
+
+function send_email() {
+  // Obtener el botón de envío y deshabilitarlo
+  document.querySelector('#send-button').disabled = true;
+
+  // Get the email data
+  const recipients = document.querySelector('#compose-recipients').value;
+  const subject = document.querySelector('#compose-subject').value;
+  const body = document.querySelector('#compose-body').value;
+
+  // Send the email
+  fetch('/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'  // Especificando que el contenido es JSON
+    },
+    body: JSON.stringify({
+      recipients: recipients,
+      subject: subject,
+      body: body
+    })
+  })
+.then(response => response.json())
+.then(result => {
+  console.log(result);
+  // Cargar la bandeja de enviados después de enviar el correo
+  load_mailbox('sent');
+  
+})
+.catch(error => {
+  console.error('Failed to send email:', error);
+  alert('Failed to send email.');
+  // Habilitar el botón nuevamente en caso de error
+  document.querySelector('#send-button').disabled = false;
+});
+}
+
 
 
 function load_mailbox(mailbox) {
@@ -114,7 +152,7 @@ function load_email(email_id, mailbox) {
       <p><strong>From:</strong> ${email.sender}</p>
       <p><strong>To:</strong> ${email.recipients.join(', ')}</p>
       <p><strong>Subject:</strong> ${email.subject}</p>
-      <p><strong>Timestamp:</strong> ${email.timestamp}</p>
+      <p><strong>Sent at:</strong> ${email.timestamp}</p>
       <button class="btn btn-sm btn-outline-primary" id="reply-button">Reply</button>
       <hr>
       <p>${email.body}</p>
@@ -138,40 +176,4 @@ function load_email(email_id, mailbox) {
 
 
 
-function send_email() {
-  // Obtener el botón de envío y deshabilitarlo
-  document.querySelector('#send-button').disabled = true;
-
-  // Get the email data
-  const recipients = document.querySelector('#compose-recipients').value;
-  const subject = document.querySelector('#compose-subject').value;
-  const body = document.querySelector('#compose-body').value;
-
-  // Send the email
-  fetch('/emails', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json'  // Especificando que el contenido es JSON
-    },
-    body: JSON.stringify({
-      recipients: recipients,
-      subject: subject,
-      body: body
-    })
-  })
-.then(response => response.json())
-.then(result => {
-  console.log(result);
-  alert('Email sent successfully!');
-  // Reiniciar el formulario y habilitar el botón nuevamente
-  document.querySelector('#compose-form').reset();
-  document.querySelector('#send-button').disabled = false;
-})
-.catch(error => {
-  console.error('Failed to send email:', error);
-  alert('Failed to send email.');
-  // Habilitar el botón nuevamente en caso de error
-  document.querySelector('#send-button').disabled = false;
-});
-}
 
