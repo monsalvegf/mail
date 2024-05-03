@@ -20,26 +20,44 @@ textarea {
 .email-details {
     flex-grow: 1;
     padding-right: 10px;
+    font-size: 0.9rem; /* Ajuste del tamaño de fuente para detalles adicionales */
 }
 
 .email-timestamp {
     white-space: nowrap;
     opacity: 0.75;
+    color: #666; /* Color gris para la fecha y hora, menos prominencia */
+    font-size: 0.8rem; /* Tamaño más pequeño para la fecha y hora */
 }
 
 .email-container {
     position: relative;
-  }
+    border: 1px solid #ccc; /* Borde sutil para el contenedor */
+    background-color: #f8f8f8; /* Color de fondo suave */
+    margin: 10px;
+    padding: 20px; /* Espacio interno para separar el contenido de los bordes */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Sombra suave para resaltar el contenedor */
+    border-radius: 8px; /* Bordes redondeados */
+}
   
-  .action-buttons {
+ 
+.email-content {
+    padding-top: 40px; /* Espacio para no solapar con los botones */
+    padding: 10px;
+    background-color: #ffffff; /* Fondo blanco para el contenido del correo */
+    border: 1px solid #ddd; /* Borde sutil para el contenido */
+    border-radius: 5px; /* Bordes redondeados para el contenido */
+    margin-bottom: 20px; /* Espacio debajo del contenido antes de los botones */
+}
+
+.action-buttons {
     position: absolute;
-    right: 0;
-    top: 0;
+    right: 20px; /* Alineación derecha con un poco de espacio al borde */
+    top: 20px; /* Posicionado en la parte superior del contenedor */
     display: flex;
     gap: 10px;
-  }
+}
   
-  .email-content {
-    padding-top: 40px; /* Espacio para no solapar con los botones */
-  }
+  
+
   
