@@ -136,7 +136,6 @@ function load_mailbox(mailbox) {
 
 
 function load_email(email_id, mailbox) {
-
   document.querySelector('#email-view').innerHTML = '';
   // Mostrar la vista de correo electrónico y ocultar otras vistas
   document.querySelector('#emails-view').style.display = 'none';
@@ -162,6 +161,18 @@ function load_email(email_id, mailbox) {
     `;
     document.querySelector('#email-view').append(element);
 
+    // Agregar botón de archivar/desarchivar según el buzón
+    if (mailbox !== 'sent') {  // No agregar en correos enviados
+      const archiveButton = document.createElement('button');
+      archiveButton.className = 'btn btn-sm btn-outline-primary';
+      archiveButton.textContent = mailbox === 'archive' ? 'Unarchive' : 'Archive';
+      archiveButton.addEventListener('click', (event) => {
+        event.stopPropagation(); // Evitar que el evento se propague más
+        archiveEmail(email_id, mailbox !== 'archive'); // Archivar si no está en archivo, desarchivar si está
+      });
+      element.appendChild(archiveButton);
+    }
+
     // Marcar el correo electrónico como leído
     if (mailbox === 'inbox' && !email.read) {
       fetch(`/emails/${email_id}`, {
@@ -177,6 +188,28 @@ function load_email(email_id, mailbox) {
   });
 }
 
-
+// Función para archivar o desarchivar correo
+function archiveEmail(emailId, archive) {
+  fetch(`/emails/${emailId}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      archived: archive
+    })
+  })
+  .then(response => {
+    if (response.ok) {
+      load_mailbox('inbox'); // Siempre recargar el buzón de entrada después de archivar/desarchivar
+    } else {
+      alert('Error updating email status.');
+    }
+  })
+  .catch(error => {
+    console.error('Error updating email:', error);
+    alert('Error updating email.');
+  });
+}
 
 
