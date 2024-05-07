@@ -65,38 +65,6 @@ function send_email() {
 }
 
 
-
-function load_mailbox(mailbox) {
-  
-  // Show the mailbox and hide other views
-  document.querySelector('#emails-view').style.display = 'block';
-  document.querySelector('#compose-view').style.display = 'none';
-  document.querySelector('#email-view').style.display = 'none';
-
-  // Show the mailbox name
-  document.querySelector('#emails-view').innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
-
-  // Obtener los correos electrónicos del servidor
-  fetch(`/emails/${mailbox}`)
-  .then(response => response.json())
-  .then(emails => {
-    console.log(emails);
-    if (emails.length === 0) {
-      document.querySelector('#emails-view').innerHTML += `<p>No emails in this mailbox.</p>`;
-    }
-
-    // Crear un elemento para cada correo electrónico
-    emails.forEach(email => {
-      const element = document.createElement('div');
-      element.className = 'email';
-      element.innerHTML = `<b>${email.sender}</b> ${email.subject} <span class="timestamp">${email.timestamp}</span>`;
-      element.addEventListener('click', () => load_email(email.id, mailbox));
-      document.querySelector('#emails-view').append(element);
-    });
-  });
-}
-
-
 function load_mailbox(mailbox) {
   // Configuración inicial de la vista
   document.querySelector('#emails-view').style.display = 'block';
@@ -228,4 +196,26 @@ function archiveEmail(emailId, archive) {
   });
 }
 
+
+function reply_email(email) {
+  // Mostrar la vista de redacción y ocultar otras vistas
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
+
+  // Rellenar el formulario de redacción
+  document.querySelector('#compose-recipients').value = email.sender; // El receptor es el remitente original
+  document.querySelector('#compose-subject').value = email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`;
+
+  // Formatear la fecha y hora del correo original para la cita
+  const emailDate = new Date(email.timestamp);
+  const formattedDate = emailDate.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
+
+  // Rellenar el cuerpo del correo con la cita del mensaje original
+  document.querySelector('#compose-body').value = `On ${formattedDate}, ${email.sender} wrote:\n>${email.body.replace(/\n/g, '\n>')}\n\n`;
+
+  // Situar el cursor al inicio del cuerpo para que el usuario pueda empezar a escribir su respuesta
+  document.querySelector('#compose-body').focus();
+  document.querySelector('#compose-body').setSelectionRange(0, 0);
+}
 
