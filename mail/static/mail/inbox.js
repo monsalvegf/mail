@@ -22,23 +22,22 @@ function compose_email(email = null) {
   sendButton.removeEventListener('click', send_email); // Eliminar listener existente para evitar duplicados
   sendButton.addEventListener('click', send_email);
 
-  if (email) {
-    // Rellenar el formulario de redacción para responder
-    document.querySelector('#compose-recipients').value = email.sender;
+  // Asegurarse de que los campos están limpios si no hay email para responder
+  document.querySelector('#compose-recipients').value = email && email.sender ? email.sender : '';
+  document.querySelector('#compose-subject').value = '';
+  document.querySelector('#compose-body').value = '';
+
+  if (email && email.subject) {
+    // Preparar el asunto del correo para responder
     document.querySelector('#compose-subject').value = email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`;
 
+    // Preparar el cuerpo del correo con una cita del mensaje original
     const emailDate = new Date(email.timestamp);
     const formattedDate = emailDate.toLocaleString('en-US', {
       month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'
     });
 
-    // Preparar el cuerpo del correo con una cita del mensaje original
     document.querySelector('#compose-body').value = `On ${formattedDate}, ${email.sender} wrote:\n>${email.body.replace(/\n/g, '\n>')}\n\n---\n\n`;
-  } else {
-    // Limpiar los campos para un nuevo correo
-    document.querySelector('#compose-recipients').value = '';
-    document.querySelector('#compose-subject').value = '';
-    document.querySelector('#compose-body').value = '';
   }
 
   // Colocar el foco en el cuerpo del mensaje para comenzar a escribir la respuesta
