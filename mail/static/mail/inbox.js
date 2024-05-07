@@ -10,22 +10,42 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox('inbox');
 });
 
-function compose_email() {
 
-  // Show compose view and hide other views
+function compose_email(email = null) {
+  // Mostrar la vista de redacción y ocultar otras vistas
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
   document.querySelector('#email-view').style.display = 'none';
 
-  // Clear out composition fields
-  document.querySelector('#compose-recipients').value = '';
-  document.querySelector('#compose-subject').value = '';
-  document.querySelector('#compose-body').value = '';
+  // Configuración del botón de envío
+  const sendButton = document.querySelector('#send-button');
+  sendButton.removeEventListener('click', send_email); // Eliminar listener existente para evitar duplicados
+  sendButton.addEventListener('click', send_email);
 
-  // Add event listener to the send button (preparar el botón de envío)
-  document.querySelector('#send-button').removeEventListener('click', send_email); // Eliminar listener existente para evitar duplicados
-  document.querySelector('#send-button').addEventListener('click', send_email);
+  if (email) {
+    // Rellenar el formulario de redacción para responder
+    document.querySelector('#compose-recipients').value = email.sender;
+    document.querySelector('#compose-subject').value = email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`;
+
+    const emailDate = new Date(email.timestamp);
+    const formattedDate = emailDate.toLocaleString('en-US', {
+      month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'
+    });
+
+    // Preparar el cuerpo del correo con una cita del mensaje original
+    document.querySelector('#compose-body').value = `On ${formattedDate}, ${email.sender} wrote:\n>${email.body.replace(/\n/g, '\n>')}\n\n---\n\n`;
+  } else {
+    // Limpiar los campos para un nuevo correo
+    document.querySelector('#compose-recipients').value = '';
+    document.querySelector('#compose-subject').value = '';
+    document.querySelector('#compose-body').value = '';
+  }
+
+  // Colocar el foco en el cuerpo del mensaje para comenzar a escribir la respuesta
+  document.querySelector('#compose-body').focus();
+  document.querySelector('#compose-body').setSelectionRange(document.querySelector('#compose-body').value.length, document.querySelector('#compose-body').value.length);
 }
+
 
 
 function send_email() {
@@ -138,38 +158,36 @@ function load_email(email_id, mailbox) {
     const replyButton = document.createElement('button');
     replyButton.className = 'btn btn-sm btn-outline-primary';
     replyButton.textContent = 'Reply';
-    replyButton.addEventListener('click', () => reply_email(email));
+    replyButton.onclick = () => compose_email(email);  // Usar 'onclick' y pasar directamente el email
 
     actionButtons.appendChild(replyButton);
 
     // Agregar botón de archivar/desarchivar según el buzón
-    if (mailbox !== 'sent') {  // No agregar en correos enviados
+    if (mailbox !== 'sent') {
       const archiveButton = document.createElement('button');
       archiveButton.className = 'btn btn-sm btn-outline-primary';
       archiveButton.textContent = mailbox === 'archive' ? 'Unarchive' : 'Archive';
-      archiveButton.addEventListener('click', (event) => {
-        event.stopPropagation(); // Evitar que el evento se propague más
-        archiveEmail(email_id, mailbox !== 'archive'); // Archivar si no está en archivo, desarchivar si está
-      });
+      archiveButton.onclick = (event) => {
+        event.stopPropagation(); 
+        archiveEmail(email_id, mailbox !== 'archive');
+      };
       actionButtons.appendChild(archiveButton);
     }
 
     emailContainer.appendChild(actionButtons);
     emailContainer.appendChild(emailContent);
-
     document.querySelector('#email-view').append(emailContainer);
 
     // Marcar el correo electrónico como leído
     if (mailbox === 'inbox' && !email.read) {
       fetch(`/emails/${email_id}`, {
         method: 'PUT',
-        body: JSON.stringify({
-          read: true
-        })
+        body: JSON.stringify({ read: true })
       });
     }
   });
 }
+
 
 
 // Función para archivar o desarchivar correo
@@ -196,26 +214,4 @@ function archiveEmail(emailId, archive) {
   });
 }
 
-
-function reply_email(email) {
-  // Mostrar la vista de redacción y ocultar otras vistas
-  document.querySelector('#emails-view').style.display = 'none';
-  document.querySelector('#email-view').style.display = 'none';
-  document.querySelector('#compose-view').style.display = 'block';
-
-  // Rellenar el formulario de redacción
-  document.querySelector('#compose-recipients').value = email.sender; // El receptor es el remitente original
-  document.querySelector('#compose-subject').value = email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`;
-
-  // Formatear la fecha y hora del correo original para la cita
-  const emailDate = new Date(email.timestamp);
-  const formattedDate = emailDate.toLocaleString('en-US', { month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric' });
-
-  // Rellenar el cuerpo del correo con la cita del mensaje original
-  document.querySelector('#compose-body').value = `On ${formattedDate}, ${email.sender} wrote:\n>${email.body.replace(/\n/g, '\n>')}\n\n`;
-
-  // Situar el cursor al inicio del cuerpo para que el usuario pueda empezar a escribir su respuesta
-  document.querySelector('#compose-body').focus();
-  document.querySelector('#compose-body').setSelectionRange(0, 0);
-}
 
