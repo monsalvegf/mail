@@ -14,7 +14,6 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 
-
 function compose_email(email = null) {
   // Mostrar la vista de redacción y ocultar otras vistas
   document.querySelector('#emails-view').style.display = 'none';
@@ -23,21 +22,26 @@ function compose_email(email = null) {
 
   // Asegurarse de que los campos están limpios si no hay email para responder
   document.querySelector('#compose-recipients').value = email && email.sender ? email.sender : '';
-  document.querySelector('#compose-subject').value = '';
-  document.querySelector('#compose-body').value = '';
-
-  if (email && email.subject) {
-    // Preparar el asunto del correo para responder
-    document.querySelector('#compose-subject').value = email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`;
+  document.querySelector('#compose-subject').value = email && email.subject ? (email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`) : '';
+  
+  if (email) {
     const formattedDate = new Date(email.timestamp).toLocaleString('en-US', {
       month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'
     });
-    document.querySelector('#compose-body').value = `On ${formattedDate}, ${email.sender} wrote:\n>${email.body.replace(/\n/g, '\n>')}\n\n---\n\n`;
+    const replyHeader = `On ${formattedDate}, ${email.sender} wrote:\n>${email.body.replace(/\n/g, '\n>')}\n\n---\n\n`;
+    // Añadir espacio para comenzar a escribir la respuesta
+    document.querySelector('#compose-body').value = '\n\n' + replyHeader;  
+  } else {
+    document.querySelector('#compose-body').value = '';
   }
 
-  // Colocar el foco en el cuerpo del mensaje para comenzar a escribir la respuesta
-  document.querySelector('#compose-body').focus();
-  document.querySelector('#compose-body').setSelectionRange(document.querySelector('#compose-body').value.length, document.querySelector('#compose-body').value.length);
+  // Colocar el foco y ajustar el desplazamiento
+  const composeBody = document.querySelector('#compose-body');
+  composeBody.focus();
+  // Colocar el cursor al inicio del texto para comenzar la respuesta
+  composeBody.setSelectionRange(0, 0);
+  // Ajustar el desplazamiento al inicio del área de texto
+  composeBody.scrollTop = 0;
 }
 
 
