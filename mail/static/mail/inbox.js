@@ -1,5 +1,4 @@
 document.addEventListener('DOMContentLoaded', function() {
-
   // Use buttons to toggle between views
   document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
@@ -7,11 +6,11 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#compose').addEventListener('click', compose_email);
 
   // Asegurarse de que el listener para el botón de envío de email se configura solo una vez al cargar la página
-
   document.querySelector('#send-button').addEventListener('click', send_email);
 
-  // By default, load the inbox
-  load_mailbox('inbox');
+  // Cargar el último buzón usado desde sessionStorage o por defecto 'inbox'
+  const lastMailbox = sessionStorage.getItem('lastMailbox') || 'inbox';
+  load_mailbox(lastMailbox);
 });
 
 
@@ -42,16 +41,13 @@ function compose_email(email = null) {
 }
 
 
-
-
 function send_email() {
-
-  // Get the email data
+  // Obtener los datos del correo electrónico de los campos del formulario
   const recipients = document.querySelector('#compose-recipients').value;
   const subject = document.querySelector('#compose-subject').value;
   const body = document.querySelector('#compose-body').value;
 
-  // Send the email
+  // Enviar el correo electrónico a través de una solicitud POST
   fetch('/emails', {
     method: 'POST',
     headers: {
@@ -63,17 +59,25 @@ function send_email() {
       body: body
     })
   })
-.then(response => response.json())
-.then(result => {
-  console.log(result);
-  // Cargar la bandeja de enviados después de enviar el correo
-  load_mailbox('sent');
-  
-})
-.catch(error => {
-  console.error('Failed to send email:', error);
-  alert('Failed to send email.');
-});
+  .then(response => response.json())  // Convertir la respuesta en JSON
+  .then(result => {
+    // Verificar si el envío fue exitoso antes de proceder
+    if (result.message === "Email sent successfully.") {
+      console.log(result);
+      // Actualizar sessionStorage antes de cargar el buzón
+      sessionStorage.setItem('lastMailbox', 'sent');
+      // Cargar la bandeja de enviados después de enviar el correo
+      load_mailbox('sent');
+    } else {
+      // Manejar los posibles mensajes de error del servidor
+      alert(`Error: ${result.error}`);
+    }
+  })
+  .catch(error => {
+    // Capturar y mostrar errores que podrían ocurrir al realizar la solicitud fetch
+    console.error('Failed to send email:', error);
+    alert('Failed to send email.');
+  });
 }
 
 
