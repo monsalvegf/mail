@@ -6,9 +6,14 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
   document.querySelector('#compose').addEventListener('click', compose_email);
 
+  // Asegurarse de que el listener para el botón de envío de email se configura solo una vez al cargar la página
+
+  document.querySelector('#send-button').addEventListener('click', send_email);
+
   // By default, load the inbox
   load_mailbox('inbox');
 });
+
 
 
 function compose_email(email = null) {
@@ -16,11 +21,6 @@ function compose_email(email = null) {
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
   document.querySelector('#email-view').style.display = 'none';
-
-  // Configuración del botón de envío
-  const sendButton = document.querySelector('#send-button');
-  sendButton.removeEventListener('click', send_email); // Eliminar listener existente para evitar duplicados
-  sendButton.addEventListener('click', send_email);
 
   // Asegurarse de que los campos están limpios si no hay email para responder
   document.querySelector('#compose-recipients').value = email && email.sender ? email.sender : '';
@@ -30,13 +30,9 @@ function compose_email(email = null) {
   if (email && email.subject) {
     // Preparar el asunto del correo para responder
     document.querySelector('#compose-subject').value = email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`;
-
-    // Preparar el cuerpo del correo con una cita del mensaje original
-    const emailDate = new Date(email.timestamp);
-    const formattedDate = emailDate.toLocaleString('en-US', {
+    const formattedDate = new Date(email.timestamp).toLocaleString('en-US', {
       month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'
     });
-
     document.querySelector('#compose-body').value = `On ${formattedDate}, ${email.sender} wrote:\n>${email.body.replace(/\n/g, '\n>')}\n\n---\n\n`;
   }
 
@@ -47,9 +43,8 @@ function compose_email(email = null) {
 
 
 
+
 function send_email() {
-  // Obtener el botón de envío y deshabilitarlo
-  document.querySelector('#send-button').disabled = true;
 
   // Get the email data
   const recipients = document.querySelector('#compose-recipients').value;
@@ -78,8 +73,6 @@ function send_email() {
 .catch(error => {
   console.error('Failed to send email:', error);
   alert('Failed to send email.');
-  // Habilitar el botón nuevamente en caso de error
-  document.querySelector('#send-button').disabled = false;
 });
 }
 
