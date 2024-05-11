@@ -124,7 +124,6 @@ function load_mailbox(mailbox) {
 }
 
 
-
 function load_email(email_id, mailbox) {
   document.querySelector('#email-view').innerHTML = '';
   // Mostrar la vista de correo electrónico y ocultar otras vistas
@@ -151,7 +150,7 @@ function load_email(email_id, mailbox) {
       <p><strong>Subject:</strong> ${email.subject}</p>
       <p><strong>Sent at:</strong> ${email.timestamp}</p>
       <hr>
-      <p>${email.body}</p>
+      <p style="white-space: pre-wrap;">${email.body}</p>
     `;
 
     // Botones de acción en la parte superior derecha
@@ -164,13 +163,12 @@ function load_email(email_id, mailbox) {
 
     actionButtons.appendChild(replyButton);
 
-    // Agregar botón de archivar/desarchivar según el buzón
     if (mailbox !== 'sent') {
       const archiveButton = document.createElement('button');
       archiveButton.className = 'btn btn-sm btn-outline-primary';
       archiveButton.textContent = mailbox === 'archive' ? 'Unarchive' : 'Archive';
       archiveButton.onclick = (event) => {
-        event.stopPropagation(); 
+        event.stopPropagation();
         archiveEmail(email_id, mailbox !== 'archive');
       };
       actionButtons.appendChild(archiveButton);
@@ -180,7 +178,6 @@ function load_email(email_id, mailbox) {
     emailContainer.appendChild(emailContent);
     document.querySelector('#email-view').append(emailContainer);
 
-    // Marcar el correo electrónico como leído
     if (mailbox === 'inbox' && !email.read) {
       fetch(`/emails/${email_id}`, {
         method: 'PUT',
@@ -189,6 +186,7 @@ function load_email(email_id, mailbox) {
     }
   });
 }
+
 
 
 
