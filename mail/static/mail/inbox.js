@@ -28,9 +28,11 @@ function compose_email(email = null) {
     const formattedDate = new Date(email.timestamp).toLocaleString('en-US', {
       month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'
     });
-    const replyHeader = `On ${formattedDate}, ${email.sender} wrote:\n>${email.body.replace(/\n/g, '\n>')}\n\n---\n\n`;
-    // Añadir espacio para comenzar a escribir la respuesta
-    document.querySelector('#compose-body').value = '\n\n' + replyHeader;  
+    // Preparar el encabezado de respuesta y el cuerpo del mensaje original con una línea de separación
+    const replyHeader = `On ${formattedDate}, ${email.sender} wrote:\n>${email.body.replace(/\n/g, '\n>')}\n`;
+    const separator = '------------------------------------------------\n\n';  // Línea de separación
+    // Añadir espacio al inicio para la nueva respuesta, seguido de una sola línea de separación y el texto pre-rellenado
+    document.querySelector('#compose-body').value = '\n\n' + separator + replyHeader;  
   } else {
     document.querySelector('#compose-body').value = '';
   }
