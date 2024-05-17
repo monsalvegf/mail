@@ -8,6 +8,11 @@ document.addEventListener('DOMContentLoaded', function() {
   // Asegurarse de que el listener para el botón de envío de email se configura solo una vez al cargar la página
   document.querySelector('#send-button').addEventListener('click', send_email);
 
+  // Add event listener for the logout button to clear sessionStorage
+  document.querySelector('#logout').addEventListener('click', () => {
+    sessionStorage.clear();
+  });
+
   // Cargar el último buzón usado desde sessionStorage o por defecto 'inbox'
   const lastMailbox = sessionStorage.getItem('lastMailbox') || 'inbox';
   load_mailbox(lastMailbox);
