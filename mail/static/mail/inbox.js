@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', function() {
   document.querySelector('#inbox').addEventListener('click', () => load_mailbox('inbox'));
   document.querySelector('#sent').addEventListener('click', () => load_mailbox('sent'));
   document.querySelector('#archived').addEventListener('click', () => load_mailbox('archive'));
-  document.querySelector('#compose').addEventListener('click', compose_email);
+  document.querySelector('#compose').addEventListener('click', () => compose_email());  // <- Asegúrate de que esto esté correcto
 
   // Asegurarse de que el listener para el botón de envío de email se configura solo una vez al cargar la página
   document.querySelector('#send-button').addEventListener('click', send_email);
@@ -18,28 +18,37 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox(lastMailbox);
 });
 
-
 function compose_email(email = null) {
+  console.log('compose_email called with:', email);  // Añadir esta línea
+
   // Mostrar la vista de redacción y ocultar otras vistas
   document.querySelector('#emails-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
   document.querySelector('#email-view').style.display = 'none';
 
-  // Asegurarse de que los campos están limpios si no hay email para responder
-  document.querySelector('#compose-recipients').value = email && email.sender ? email.sender : '';
-  document.querySelector('#compose-subject').value = email && email.subject ? (email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`) : '';
-  
+  // Limpiar los campos del formulario
+  document.querySelector('#compose-recipients').value = '';
+  document.querySelector('#compose-subject').value = '';
+  document.querySelector('#compose-body').value = '';
+
   if (email) {
+    console.log('Responding to an email');  // Añadir esta línea
+
+    // Si hay un email, se está respondiendo a ese email
+    document.querySelector('#compose-recipients').value = email.sender || '';
+    document.querySelector('#compose-subject').value = email.subject ? (email.subject.startsWith('Re: ') ? email.subject : `Re: ${email.subject}`) : '';
+
     const formattedDate = new Date(email.timestamp).toLocaleString('en-US', {
       month: 'long', day: 'numeric', year: 'numeric', hour: 'numeric', minute: 'numeric', second: 'numeric'
     });
     // Preparar el encabezado de respuesta y el cuerpo del mensaje original con una línea de separación
-    const replyHeader = `On ${formattedDate}, ${email.sender} wrote:\n>${email.body.replace(/\n/g, '\n>')}\n`;
+    const replyHeader = `On ${formattedDate}, ${email.sender} wrote:\n>${email.body ? email.body.replace(/\n/g, '\n>') : ''}\n`;
     const separator = '------------------------------------------------\n\n';  // Línea de separación
+
     // Añadir espacio al inicio para la nueva respuesta, seguido de una sola línea de separación y el texto pre-rellenado
     document.querySelector('#compose-body').value = '\n\n' + separator + replyHeader;  
   } else {
-    document.querySelector('#compose-body').value = '';
+    console.log('Composing a new email');  // Añadir esta línea
   }
 
   // Colocar el foco y ajustar el desplazamiento
